@@ -46,6 +46,13 @@ class SketchField extends PureComponent {
         widthCorrection: PropTypes.number,
         // Specify some height correction which will be applied on auto resize
         heightCorrection: PropTypes.number
+         // react-sketch/src/SketchField.jsx
+
+        // new added 
+        onUpdate: PropTypes.func, // function to execute when an object is modified
+        username: PropTypes.string, // username of the current user
+        shortid: PropTypes.func // helper for generating random unique IDs for objects
+    
     };
 
     static defaultProps = {
@@ -140,6 +147,13 @@ class SketchField extends PureComponent {
         let state = JSON.stringify(objState);
         // object, previous state, current state
         this._history.keep([obj, state, state])
+        
+        if (!obj.sender) { 
+            const id = this.props.shortid.generate(); 
+            Object.assign(obj, { id });
+            this.props.onUpdate(JSON.stringify(obj), 'add', this.props.username, id); 
+        }
+        
     };
 
     /**
@@ -522,6 +536,12 @@ class SketchField extends PureComponent {
         obj.originalState = objState;
         let currState = JSON.stringify(objState);
         this._history.keep([obj, prevState, currState]);
+        
+        if (!obj.sender) {
+            let strObj = JSON.stringify(obj);
+            this.props.onUpdate(strObj, 'update', this.props.username, obj.id);
+        }
+        
     };
 
     _onMouseUp = (e) => {
